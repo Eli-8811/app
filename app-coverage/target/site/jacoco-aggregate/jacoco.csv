@@ -1,0 +1,4 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+app-coverage/app-common,com.mx.core.common,Util,7,0,0,0,3,0,2,0,2,0
+app-coverage/app-service,com.mx.core.service,UsuarioService,19,0,0,0,4,0,3,0,3,0
+app-coverage/app-controller,com.mx.core.controller,UsuarioController,27,0,2,0,6,0,3,0,2,0
