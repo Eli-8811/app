@@ -58,8 +58,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    	
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {    	
     	http
         .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -70,15 +69,12 @@ public class SecurityConfig {
                 "/", 
                 "/favicon.ico", 
                 "/**",
-                "/app-api-dev/sesion/**"
+                "/app-api-dev/auth/**"
             ).permitAll()
             .anyRequest().authenticated()
         );
-
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-        
+        return http.build();        
     }
 
     @Bean

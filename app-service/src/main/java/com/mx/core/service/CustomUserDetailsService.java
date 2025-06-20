@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.mx.core.common.exception.ResourceNotFoundException;
 import com.mx.core.repository.UsuarioRepository;
-import com.mx.core.repository.entity.User;
-import com.mx.core.repository.entity.UserPrincipal;
+import com.mx.core.repository.entity.Usuario;
+import com.mx.core.repository.entity.UsuarioPrincipal;
 
 import lombok.AllArgsConstructor;
 
@@ -19,22 +19,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	private final UsuarioRepository userRepository;
 
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {    	
-        User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found with username or email : " + usernameOrEmail)
-        );
-        return UserPrincipal.create(user);
-    }
+	@Override
+	@Transactional
+	public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+		Usuario user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(
+				() -> new UsernameNotFoundException("User not found with username or email : " + usernameOrEmail));
+		return UsuarioPrincipal.create(user);
+	}
 
-    @Transactional
-    public UserDetails loadUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(
-            () -> new ResourceNotFoundException("User", "id", id)
-        );
-        return UserPrincipal.create(user);
-    }
-    
+	@Transactional
+	public UserDetails loadUserById(Long id) {
+		Usuario user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+		return UsuarioPrincipal.create(user);
+	}
+
 }

@@ -3,8 +3,10 @@
 import com.mx.core.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,64 +34,71 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService,
-<span class="nc" id="L35">                          JwtAuthenticationEntryPoint unauthorizedHandler) {</span>
-<span class="nc" id="L36">        this.customUserDetailsService = customUserDetailsService;</span>
-<span class="nc" id="L37">        this.unauthorizedHandler = unauthorizedHandler;</span>
-<span class="nc" id="L38">    }</span>
+<span class="nc" id="L37">                          JwtAuthenticationEntryPoint unauthorizedHandler) {</span>
+<span class="nc" id="L38">        this.customUserDetailsService = customUserDetailsService;</span>
+<span class="nc" id="L39">        this.unauthorizedHandler = unauthorizedHandler;</span>
+<span class="nc" id="L40">    }</span>
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-<span class="nc" id="L42">        return new JwtAuthenticationFilter();</span>
+<span class="nc" id="L44">        return new JwtAuthenticationFilter();</span>
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-<span class="nc" id="L47">        return new BCryptPasswordEncoder();</span>
+<span class="nc" id="L49">        return new BCryptPasswordEncoder();</span>
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-<span class="nc" id="L52">        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();</span>
-<span class="nc" id="L53">        provider.setUserDetailsService(customUserDetailsService);</span>
-<span class="nc" id="L54">        provider.setPasswordEncoder(passwordEncoder());</span>
-<span class="nc" id="L55">        return provider;</span>
+<span class="nc" id="L54">        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();</span>
+<span class="nc" id="L55">        provider.setUserDetailsService(customUserDetailsService);</span>
+<span class="nc" id="L56">        provider.setPasswordEncoder(passwordEncoder());</span>
+<span class="nc" id="L57">        return provider;</span>
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     	
-<span class="nc" id="L61">    	http</span>
-<span class="nc" id="L62">        .csrf(csrf -&gt; csrf.disable())</span>
-<span class="nc" id="L63">        .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
-<span class="nc" id="L64">        .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
-<span class="nc" id="L65">        .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
-<span class="nc" id="L66">        .authorizeHttpRequests(authz -&gt; authz</span>
-<span class="nc" id="L67">            .requestMatchers(</span>
+<span class="nc" id="L63">    	http</span>
+<span class="nc" id="L64">        .csrf(csrf -&gt; csrf.disable())</span>
+<span class="nc" id="L65">        .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
+<span class="nc" id="L66">        .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
+<span class="nc" id="L67">        .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="nc" id="L68">        .authorizeHttpRequests(authz -&gt; authz</span>
+<span class="nc" id="L69">            .requestMatchers(</span>
                 &quot;/&quot;, 
                 &quot;/favicon.ico&quot;, 
                 &quot;/**&quot;,
                 &quot;/app-api-dev/sesion/**&quot;
-<span class="nc" id="L72">            ).permitAll()</span>
-<span class="nc" id="L73">            .anyRequest().authenticated()</span>
+<span class="nc" id="L74">            ).permitAll()</span>
+<span class="nc" id="L75">            .anyRequest().authenticated()</span>
         );
 
-<span class="nc" id="L76">        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="nc" id="L78">        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="nc" id="L78">        return http.build();</span>
+<span class="nc" id="L80">        return http.build();</span>
         
     }
 
     @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+<span class="nc" id="L86">        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);</span>
+<span class="nc" id="L87">        builder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());</span>
+<span class="nc" id="L88">        return builder.build();</span>
+    }
+    
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-<span class="nc" id="L84">        CorsConfiguration configuration = new CorsConfiguration();</span>
-<span class="nc" id="L85">        configuration.setAllowedOriginPatterns(List.of(&quot;*&quot;));</span>
-<span class="nc" id="L86">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;PATCH&quot;));</span>
-<span class="nc" id="L87">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
-<span class="nc" id="L88">        configuration.setAllowCredentials(true);</span>
-<span class="nc" id="L89">        configuration.setMaxAge(3600L);</span>
-<span class="nc" id="L90">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
-<span class="nc" id="L91">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
-<span class="nc" id="L92">        return source;</span>
+<span class="nc" id="L93">        CorsConfiguration configuration = new CorsConfiguration();</span>
+<span class="nc" id="L94">        configuration.setAllowedOriginPatterns(List.of(&quot;*&quot;));</span>
+<span class="nc" id="L95">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;PATCH&quot;));</span>
+<span class="nc" id="L96">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
+<span class="nc" id="L97">        configuration.setAllowCredentials(true);</span>
+<span class="nc" id="L98">        configuration.setMaxAge(3600L);</span>
+<span class="nc" id="L99">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="nc" id="L100">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
+<span class="nc" id="L101">        return source;</span>
     }
     
 }

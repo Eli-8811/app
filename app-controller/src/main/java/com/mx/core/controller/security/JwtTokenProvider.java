@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import com.mx.core.repository.entity.UserPrincipal;
+import com.mx.core.repository.entity.UsuarioPrincipal;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -33,7 +33,7 @@ public class JwtTokenProvider {
 
     public String generateToken(Authentication authentication) {
     	
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        UsuarioPrincipal userPrincipal = (UsuarioPrincipal) authentication.getPrincipal();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
@@ -71,6 +71,17 @@ public class JwtTokenProvider {
             log.error("JWT claims string is empty.");
         }
         return false;
+    }
+
+    public String generateTokenFromUserId(Long userId) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+        return Jwts.builder()
+                .setSubject(Long.toString(userId))
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
     }
     
 }

@@ -20,7 +20,7 @@ import java.util.Set;
             "email"
         })
 })
-public class User extends DateAudit {
+public class Usuario extends DateAudit {
     
 	private static final long serialVersionUID = 1L;
 
@@ -52,11 +52,11 @@ public class User extends DateAudit {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    public User() {
+    public Usuario() {
 
     }
 
-    public User(String name, String username, String email, String password) {
+    public Usuario(String name, String username, String email, String password) {
         this.name = name;
         this.username = username;
         this.email = email;
