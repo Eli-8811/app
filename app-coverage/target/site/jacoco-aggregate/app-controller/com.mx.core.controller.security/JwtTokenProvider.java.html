@@ -72,6 +72,17 @@ import java.util.Date;
 <span class="nc" id="L72">        }</span>
 <span class="nc" id="L73">        return false;</span>
     }
+
+    public String generateTokenFromUserId(Long userId) {
+<span class="nc" id="L77">        Date now = new Date();</span>
+<span class="nc" id="L78">        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);</span>
+<span class="nc" id="L79">        return Jwts.builder()</span>
+<span class="nc" id="L80">                .setSubject(Long.toString(userId))</span>
+<span class="nc" id="L81">                .setIssuedAt(now)</span>
+<span class="nc" id="L82">                .setExpiration(expiryDate)</span>
+<span class="nc" id="L83">                .signWith(key, SignatureAlgorithm.HS512)</span>
+<span class="nc" id="L84">                .compact();</span>
+    }
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

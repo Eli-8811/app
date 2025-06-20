@@ -19,19 +19,19 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	private final UsuarioRepository userRepository;
 
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {    	
-<span class="nc" id="L25">        Usuario user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username or email : &quot; + usernameOrEmail)</span>
-        );
-<span class="nc" id="L27">        return UsuarioPrincipal.create(user);</span>
-    }
+	@Override
+	@Transactional
+	public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+<span class="nc" id="L25">		Usuario user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(</span>
+<span class="nc" id="L26">				() -&gt; new UsernameNotFoundException(&quot;User not found with username or email : &quot; + usernameOrEmail));</span>
+<span class="nc" id="L27">		return UsuarioPrincipal.create(user);</span>
+	}
 
-    @Transactional
-    public UserDetails loadUserById(Long id) {
-<span class="nc" id="L32">        Usuario user = userRepository.findById(id).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, id));</span>
-<span class="nc" id="L33">        return UsuarioPrincipal.create(user);</span>
-    }
-    
+	@Transactional
+	public UserDetails loadUserById(Long id) {
+<span class="nc" id="L32">		Usuario user = userRepository.findById(id).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, id));</span>
+<span class="nc" id="L33">		return UsuarioPrincipal.create(user);</span>
+	}
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
