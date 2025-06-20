@@ -58,47 +58,43 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    	
-<span class="nc" id="L63">    	http</span>
-<span class="nc" id="L64">        .csrf(csrf -&gt; csrf.disable())</span>
-<span class="nc" id="L65">        .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
-<span class="nc" id="L66">        .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
-<span class="nc" id="L67">        .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
-<span class="nc" id="L68">        .authorizeHttpRequests(authz -&gt; authz</span>
-<span class="nc" id="L69">            .requestMatchers(</span>
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {    	
+<span class="nc" id="L62">    	http</span>
+<span class="nc" id="L63">        .csrf(csrf -&gt; csrf.disable())</span>
+<span class="nc" id="L64">        .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
+<span class="nc" id="L65">        .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
+<span class="nc" id="L66">        .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="nc" id="L67">        .authorizeHttpRequests(authz -&gt; authz</span>
+<span class="nc" id="L68">            .requestMatchers(</span>
                 &quot;/&quot;, 
                 &quot;/favicon.ico&quot;, 
                 &quot;/**&quot;,
-                &quot;/app-api-dev/sesion/**&quot;
-<span class="nc" id="L74">            ).permitAll()</span>
-<span class="nc" id="L75">            .anyRequest().authenticated()</span>
+                &quot;/app-api-dev/auth/**&quot;
+<span class="nc" id="L73">            ).permitAll()</span>
+<span class="nc" id="L74">            .anyRequest().authenticated()</span>
         );
-
-<span class="nc" id="L78">        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
-
-<span class="nc" id="L80">        return http.build();</span>
-        
+<span class="nc" id="L76">        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="nc" id="L77">        return http.build();        </span>
     }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-<span class="nc" id="L86">        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);</span>
-<span class="nc" id="L87">        builder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());</span>
-<span class="nc" id="L88">        return builder.build();</span>
+<span class="nc" id="L82">        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);</span>
+<span class="nc" id="L83">        builder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());</span>
+<span class="nc" id="L84">        return builder.build();</span>
     }
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-<span class="nc" id="L93">        CorsConfiguration configuration = new CorsConfiguration();</span>
-<span class="nc" id="L94">        configuration.setAllowedOriginPatterns(List.of(&quot;*&quot;));</span>
-<span class="nc" id="L95">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;PATCH&quot;));</span>
-<span class="nc" id="L96">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
-<span class="nc" id="L97">        configuration.setAllowCredentials(true);</span>
-<span class="nc" id="L98">        configuration.setMaxAge(3600L);</span>
-<span class="nc" id="L99">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
-<span class="nc" id="L100">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
-<span class="nc" id="L101">        return source;</span>
+<span class="nc" id="L89">        CorsConfiguration configuration = new CorsConfiguration();</span>
+<span class="nc" id="L90">        configuration.setAllowedOriginPatterns(List.of(&quot;*&quot;));</span>
+<span class="nc" id="L91">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;PATCH&quot;));</span>
+<span class="nc" id="L92">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
+<span class="nc" id="L93">        configuration.setAllowCredentials(true);</span>
+<span class="nc" id="L94">        configuration.setMaxAge(3600L);</span>
+<span class="nc" id="L95">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="nc" id="L96">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
+<span class="nc" id="L97">        return source;</span>
     }
     
 }
