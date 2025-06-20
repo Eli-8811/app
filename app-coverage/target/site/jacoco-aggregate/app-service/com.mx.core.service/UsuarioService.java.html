@@ -5,22 +5,16 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.mx.core.repository.UsuarioRepository;
-import com.mx.core.repository.entity.Usuario;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="nc" id="L13">@AllArgsConstructor</span>
-<span class="nc" id="L14">@Slf4j</span>
+<span class="nc" id="L12">@AllArgsConstructor</span>
+<span class="nc" id="L13">@Slf4j</span>
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-
-    public List&lt;Usuario&gt; findByNombre(String nombre) {
-<span class="nc" id="L21">        log.info(&quot;Buscando usuarios por nombre: {}&quot;, nombre);</span>
-<span class="nc" id="L22">        return usuarioRepository.findByNombre(nombre);</span>
-    }
-	
+    
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
