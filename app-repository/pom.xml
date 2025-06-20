@@ -9,6 +9,13 @@
   </parent>
   <artifactId>app-repository</artifactId>
   <name>app-repository</name>
+  <dependencies>
+	<dependency>
+		<groupId>com.mx.core</groupId>
+		<artifactId>app-model</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+  </dependencies>
     <build>
 		<plugins>
 			<plugin>

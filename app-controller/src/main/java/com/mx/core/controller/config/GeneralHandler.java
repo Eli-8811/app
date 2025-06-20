@@ -2,10 +2,10 @@ package com.mx.core.controller.config;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import com.mx.core.controller.UsuarioController;
+import com.mx.core.controller.AuthController;
 
 @ControllerAdvice(basePackageClasses = {
-		UsuarioController.class
+		AuthController.class
 })
 public class GeneralHandler extends RestAdvice {
 	
