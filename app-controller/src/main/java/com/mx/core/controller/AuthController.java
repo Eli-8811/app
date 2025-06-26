@@ -6,6 +6,7 @@ import java.util.Collections;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.mx.core.common.exception.AppBadCredentialsException;
 import com.mx.core.controller.security.JwtTokenProvider;
 import com.mx.core.model.ResponseGeneric;
 import com.mx.core.model.RoleName;
@@ -43,16 +45,20 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody SignInRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
+        try {
+            Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsernameOrEmail(),
-                        loginRequest.getPassword()
+                    loginRequest.getUsernameOrEmail(),
+                    loginRequest.getPassword()
                 )
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
-        log.debug(jwt);
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateToken(authentication);
+            log.debug(jwt);
+            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+        } catch (BadCredentialsException ex) {
+            throw new AppBadCredentialsException("401", "Autenticación fallida", "Usuario o contraseña incorrectos");
+        }
     }
     
     @PostMapping("/signup")

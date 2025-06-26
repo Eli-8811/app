@@ -1,5 +1,7 @@
 package com.mx.core.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.mx.core.repository.UsuarioRepository;
@@ -13,27 +15,31 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class UsuarioService {
 
-    private final UsuarioRepository userRepository;
+    private final UsuarioRepository usuarioRepository;
 
 	public boolean existsByUsername(String username) {
-		return userRepository.existsByUsername(username);
+		return usuarioRepository.existsByUsername(username);
 	}
 
 	public boolean existsByEmail(String email) {
-		return userRepository.existsByEmail(email);
+		return usuarioRepository.existsByEmail(email);
 	}
 
 	public Usuario findByIdWithRoles(Long userId) {
-	    return userRepository.findByIdWithRoles(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+	    return usuarioRepository.findByIdWithRoles(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
 	}
 
 	public void save(Usuario user) {
-		userRepository.save(user);
+		usuarioRepository.save(user);
 	}
 
 	public void deleteById(Long id) {
-	    Usuario usuario = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
-	    userRepository.delete(usuario);
+	    Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+	    usuarioRepository.delete(usuario);
 	}
 	
+    public List<Usuario> getAllUsersWithRolesAndPermissions() {
+        return usuarioRepository.findAllWithRolesAndPermissions();
+    }
+    
 }

@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.mx.core.common.exception.AppBadRequestException;
 import com.mx.core.common.exception.AppException;
 import com.mx.core.common.exception.AppNotFoundException;
+import com.mx.core.common.exception.AppBadCredentialsException;
 import com.mx.core.model.ResponseGeneric;
 
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +27,12 @@ public abstract class RestAdvice extends ResponseEntityExceptionHandler {
         return buildErrorResponse("Ocurrió un error interno en el servidor", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(AppBadCredentialsException.class)
+    public final ResponseEntity<ResponseGeneric<Void>> handleBadCredentialsException(AppBadCredentialsException ex, WebRequest request) {
+        log.error("Authentication failed: {}", request.getDescription(false), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseGeneric.buildError(ex.getMessage()));
+    }
+    
     @ExceptionHandler(ConstraintViolationException.class)
     public final ResponseEntity<ResponseGeneric<Void>> handleConstraintViolationException(
         ConstraintViolationException ex, WebRequest request) {

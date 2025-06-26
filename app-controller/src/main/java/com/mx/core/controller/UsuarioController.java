@@ -1,6 +1,7 @@
 package com.mx.core.controller;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -182,4 +183,10 @@ public class UsuarioController {
 	    }
 	}
 	
+    @GetMapping("/listar")
+    public ResponseEntity<ResponseGeneric<List<Usuario>>> getAllUsers() {
+        List<Usuario> usuarios = usuarioService.getAllUsersWithRolesAndPermissions();
+        return ResponseEntity.ok(ResponseGeneric.buildSuccess("Usuarios encontrados", usuarios));
+    }
+    
 }
