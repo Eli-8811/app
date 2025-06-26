@@ -58,25 +58,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {    	
-<span class="nc" id="L62">    	http</span>
-<span class="nc" id="L63">        .csrf(csrf -&gt; csrf.disable())</span>
-<span class="nc" id="L64">        .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
-<span class="nc" id="L65">        .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
-<span class="nc" id="L66">        .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
-<span class="nc" id="L67">        .authorizeHttpRequests(authz -&gt; authz</span>
-<span class="nc" id="L68">            .requestMatchers(</span>
-                &quot;/&quot;, 
-                &quot;/favicon.ico&quot;, 
-                &quot;/**&quot;,
-                &quot;/app-api-dev/auth/**&quot;
-<span class="nc" id="L73">            ).permitAll()</span>
-<span class="nc" id="L74">            .anyRequest().authenticated()</span>
-        );
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="nc" id="L62">        http</span>
+<span class="nc" id="L63">            .csrf(csrf -&gt; csrf.disable())</span>
+<span class="nc" id="L64">            .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
+<span class="nc" id="L65">            .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
+<span class="nc" id="L66">            .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="nc" id="L67">            .authorizeHttpRequests(authz -&gt; authz</span>
+<span class="nc" id="L68">                .requestMatchers(</span>
+                    &quot;/&quot;, 
+                    &quot;/favicon.ico&quot;, 
+                    &quot;/auth/**&quot;
+<span class="nc" id="L72">                ).permitAll()</span>
+<span class="nc" id="L73">                .requestMatchers(&quot;/usuario/**&quot;).authenticated()</span>
+<span class="nc" id="L74">                .anyRequest().permitAll()</span>
+            );
 <span class="nc" id="L76">        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
-<span class="nc" id="L77">        return http.build();        </span>
+<span class="nc" id="L77">        return http.build();</span>
     }
-
+    
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 <span class="nc" id="L82">        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);</span>
