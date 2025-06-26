@@ -1,0 +1,11 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+app-coverage/app-common,com.mx.core.common,Util,7,0,0,0,3,0,2,0,2,0
+app-coverage/app-service,com.mx.core.service,CustomUserDetailsService,44,0,0,0,6,0,5,0,5,0
+app-coverage/app-service,com.mx.core.service,RoleService,23,0,0,0,4,0,4,0,4,0
+app-coverage/app-service,com.mx.core.service,UsuarioService,48,0,0,0,9,0,8,0,8,0
+app-coverage/app-controller,com.mx.core.controller,AuthController,124,0,4,0,32,0,6,0,4,0
+app-coverage/app-controller,com.mx.core.controller,UsuarioController,158,0,4,0,42,0,7,0,5,0
+app-coverage/app-controller,com.mx.core.controller.security,JwtAuthenticationFilter,77,0,8,0,18,0,8,0,4,0
+app-coverage/app-controller,com.mx.core.controller.security,JwtAuthenticationEntryPoint,18,0,0,0,5,0,3,0,3,0
+app-coverage/app-controller,com.mx.core.controller.security,JwtTokenProvider,124,0,0,0,39,0,7,0,7,0
+app-coverage/app-controller,com.mx.core.controller.security,SecurityConfig,160,0,0,0,33,0,12,0,12,0
