@@ -8,9 +8,9 @@ import com.mx.core.repository.entity.Usuario;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="nc" id="L11">@AllArgsConstructor</span>
-<span class="nc" id="L12">@Slf4j</span>
+<span class="nc" id="L11">@Slf4j</span>
 @Service
+<span class="nc" id="L13">@AllArgsConstructor</span>
 public class UsuarioService {
 
     private final UsuarioRepository userRepository;
@@ -23,8 +23,8 @@ public class UsuarioService {
 <span class="nc" id="L23">		return userRepository.existsByEmail(email);</span>
 	}
 
-	public Usuario findById(Long userId) {
-<span class="nc" id="L27">	    return userRepository.findById(userId).orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado con ID: &quot; + userId));</span>
+	public Usuario findByIdWithRoles(Long userId) {
+<span class="nc" id="L27">	    return userRepository.findByIdWithRoles(userId).orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado con ID: &quot; + userId));</span>
 	}
 
 	public void save(Usuario user) {
@@ -32,8 +32,9 @@ public class UsuarioService {
 <span class="nc" id="L32">	}</span>
 
 	public void deleteById(Long id) {
-<span class="nc" id="L35">	    userRepository.deleteById(id);</span>
-<span class="nc" id="L36">	}</span>
-    
+<span class="nc" id="L35">	    Usuario usuario = userRepository.findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+<span class="nc" id="L36">	    userRepository.delete(usuario);</span>
+<span class="nc" id="L37">	}</span>
+	
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
