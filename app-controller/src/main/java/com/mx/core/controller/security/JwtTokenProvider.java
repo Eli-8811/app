@@ -62,30 +62,12 @@ public class JwtTokenProvider {
 		
     }
     
-    /*
-    public String generateToken(Authentication authentication) {
-    	
-        UsuarioPrincipal userPrincipal = (UsuarioPrincipal) authentication.getPrincipal();
-
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
-        return Jwts.builder()
-                .setSubject(Long.toString(userPrincipal.getId()))
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-        
-    }
-    */
     public Long getUserIdFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-
         return Long.parseLong(claims.getSubject());
     }
 
