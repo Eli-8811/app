@@ -2,13 +2,26 @@ package com.mx.core.service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.mx.core.common.exception.ResourceNotFoundException;
+import com.mx.core.model.payload.ChoiceResponse;
 import com.mx.core.model.payload.PollRequest;
+import com.mx.core.model.payload.PollResponse;
+import com.mx.core.model.payload.UserSummary;
 import com.mx.core.repository.PollRepository;
+import com.mx.core.repository.UsuarioRepository;
+import com.mx.core.repository.VoteRepository;
 import com.mx.core.repository.entity.Choice;
+import com.mx.core.repository.entity.ChoiceVoteCount;
 import com.mx.core.repository.entity.Poll;
+import com.mx.core.repository.entity.Usuario;
+import com.mx.core.repository.entity.UsuarioPrincipal;
+import com.mx.core.repository.entity.Vote;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 public class PollService {
 
 	private final PollRepository pollRepository;
+	private final VoteRepository voteRepository;
+	private final UsuarioRepository usuarioRepository;
 	
     public Poll createPoll(PollRequest pollRequest) {
     	
@@ -39,5 +54,50 @@ public class PollService {
         return pollRepository.save(poll);
         
     }
+    
+    public PollResponse getPollById(Long pollId, UsuarioPrincipal currentUser) {    	
+        Poll poll = pollRepository.findById(pollId).orElseThrow(() -> new ResourceNotFoundException("Poll", "id", pollId));
+        List<ChoiceVoteCount> votes = voteRepository.countByPollIdGroupByChoiceId(pollId);
+        Map<Long, Long> choiceVotesMap = votes.stream().collect(Collectors.toMap(ChoiceVoteCount::getChoiceId, ChoiceVoteCount::getVoteCount));
+        Usuario creator = usuarioRepository.findById(poll.getCreatedBy()).orElseThrow(() -> new ResourceNotFoundException("User", "id", poll.getCreatedBy()));
+        Vote userVote = null;
+        if(currentUser != null) {
+            userVote = voteRepository.findByUserIdAndPollId(currentUser.getId(), pollId);
+        }
+        return this.mapPollToPollResponse(poll, choiceVotesMap,
+                creator, userVote != null ? userVote.getChoice().getId(): null);
+    }
+ 
+    public PollResponse mapPollToPollResponse(Poll poll, Map<Long, Long> choiceVotesMap, Usuario creator, Long userVote) {
+        PollResponse pollResponse = new PollResponse();
+        pollResponse.setId(poll.getId());
+        pollResponse.setQuestion(poll.getQuestion());
+        pollResponse.setCreationDateTime(poll.getCreatedAt());
+        pollResponse.setExpirationDateTime(poll.getExpirationDateTime());
+        Instant now = Instant.now();
+        pollResponse.setExpired(poll.getExpirationDateTime().isBefore(now));
+        List<ChoiceResponse> choiceResponses = poll.getChoices().stream().map(choice -> {
+            ChoiceResponse choiceResponse = new ChoiceResponse();
+            choiceResponse.setId(choice.getId());
+            choiceResponse.setText(choice.getText());
+
+            if(choiceVotesMap.containsKey(choice.getId())) {
+                choiceResponse.setVoteCount(choiceVotesMap.get(choice.getId()));
+            } else {
+                choiceResponse.setVoteCount(0);
+            }
+            return choiceResponse;
+        }).collect(Collectors.toList());
+        pollResponse.setChoices(choiceResponses);
+        UserSummary creatorSummary = new UserSummary(creator.getId(), creator.getUsername(), creator.getName());
+        pollResponse.setCreatedBy(creatorSummary);
+        if(userVote != null) {
+            pollResponse.setSelectedChoice(userVote);
+        }
+        long totalVotes = pollResponse.getChoices().stream().mapToLong(ChoiceResponse::getVoteCount).sum();
+        pollResponse.setTotalVotes(totalVotes);
+        return pollResponse;
+    }
+
     
 }

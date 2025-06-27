@@ -2,43 +2,103 @@
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.mx.core.common.exception.ResourceNotFoundException;
+import com.mx.core.model.ChoiceVoteCount;
+import com.mx.core.model.payload.ChoiceResponse;
 import com.mx.core.model.payload.PollRequest;
+import com.mx.core.model.payload.PollResponse;
+import com.mx.core.model.payload.UserSummary;
 import com.mx.core.repository.PollRepository;
+import com.mx.core.repository.UsuarioRepository;
+import com.mx.core.repository.VoteRepository;
 import com.mx.core.repository.entity.Choice;
 import com.mx.core.repository.entity.Poll;
+import com.mx.core.repository.entity.Usuario;
+import com.mx.core.repository.entity.UsuarioPrincipal;
+import com.mx.core.repository.entity.Vote;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="nc" id="L16">@Slf4j</span>
+<span class="nc" id="L29">@Slf4j</span>
 @Service
-<span class="nc" id="L18">@AllArgsConstructor</span>
+<span class="nc" id="L31">@AllArgsConstructor</span>
 public class PollService {
 
 	private final PollRepository pollRepository;
+	private final VoteRepository voteRepository;
+	private final UsuarioRepository usuarioRepository;
 	
     public Poll createPoll(PollRequest pollRequest) {
     	
-<span class="nc" id="L25">        Poll poll = new Poll();</span>
+<span class="nc" id="L40">        Poll poll = new Poll();</span>
         
-<span class="nc" id="L27">        poll.setQuestion(pollRequest.getQuestion());</span>
+<span class="nc" id="L42">        poll.setQuestion(pollRequest.getQuestion());</span>
 
-<span class="nc" id="L29">        pollRequest.getChoices().forEach(choiceRequest -&gt; {</span>
-<span class="nc" id="L30">            poll.addChoice(new Choice(choiceRequest.getText()));</span>
-<span class="nc" id="L31">        });</span>
+<span class="nc" id="L44">        pollRequest.getChoices().forEach(choiceRequest -&gt; {</span>
+<span class="nc" id="L45">            poll.addChoice(new Choice(choiceRequest.getText()));</span>
+<span class="nc" id="L46">        });</span>
 
-<span class="nc" id="L33">        Instant now = Instant.now();</span>
-<span class="nc" id="L34">        Instant expirationDateTime = now.plus(Duration.ofDays(pollRequest.getPollLength().getDays()))</span>
-<span class="nc" id="L35">                .plus(Duration.ofHours(pollRequest.getPollLength().getHours()));</span>
+<span class="nc" id="L48">        Instant now = Instant.now();</span>
+<span class="nc" id="L49">        Instant expirationDateTime = now.plus(Duration.ofDays(pollRequest.getPollLength().getDays()))</span>
+<span class="nc" id="L50">                .plus(Duration.ofHours(pollRequest.getPollLength().getHours()));</span>
 
-<span class="nc" id="L37">        poll.setExpirationDateTime(expirationDateTime);</span>
+<span class="nc" id="L52">        poll.setExpirationDateTime(expirationDateTime);</span>
 
-<span class="nc" id="L39">        return pollRepository.save(poll);</span>
+<span class="nc" id="L54">        return pollRepository.save(poll);</span>
         
     }
+    
+    public PollResponse getPollById(Long pollId, UsuarioPrincipal currentUser) {    	
+<span class="nc" id="L59">        Poll poll = pollRepository.findById(pollId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Poll&quot;, &quot;id&quot;, pollId));</span>
+<span class="nc" id="L60">        List&lt;ChoiceVoteCount&gt; votes = voteRepository.countByPollIdGroupByChoiceId(pollId);</span>
+<span class="nc" id="L61">        Map&lt;Long, Long&gt; choiceVotesMap = votes.stream().collect(Collectors.toMap(ChoiceVoteCount::getChoiceId, ChoiceVoteCount::getVoteCount));</span>
+<span class="nc" id="L62">        Usuario creator = usuarioRepository.findById(poll.getCreatedBy()).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, poll.getCreatedBy()));</span>
+<span class="nc" id="L63">        Vote userVote = null;</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if(currentUser != null) {</span>
+<span class="nc" id="L65">            userVote = voteRepository.findByUserIdAndPollId(currentUser.getId(), pollId);</span>
+        }
+<span class="nc" id="L67">        return this.mapPollToPollResponse(poll, choiceVotesMap,</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                creator, userVote != null ? userVote.getChoice().getId(): null);</span>
+    }
+ 
+    public PollResponse mapPollToPollResponse(Poll poll, Map&lt;Long, Long&gt; choiceVotesMap, Usuario creator, Long userVote) {
+<span class="nc" id="L72">        PollResponse pollResponse = new PollResponse();</span>
+<span class="nc" id="L73">        pollResponse.setId(poll.getId());</span>
+<span class="nc" id="L74">        pollResponse.setQuestion(poll.getQuestion());</span>
+<span class="nc" id="L75">        pollResponse.setCreationDateTime(poll.getCreatedAt());</span>
+<span class="nc" id="L76">        pollResponse.setExpirationDateTime(poll.getExpirationDateTime());</span>
+<span class="nc" id="L77">        Instant now = Instant.now();</span>
+<span class="nc" id="L78">        pollResponse.setExpired(poll.getExpirationDateTime().isBefore(now));</span>
+<span class="nc" id="L79">        List&lt;ChoiceResponse&gt; choiceResponses = poll.getChoices().stream().map(choice -&gt; {</span>
+<span class="nc" id="L80">            ChoiceResponse choiceResponse = new ChoiceResponse();</span>
+<span class="nc" id="L81">            choiceResponse.setId(choice.getId());</span>
+<span class="nc" id="L82">            choiceResponse.setText(choice.getText());</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            if(choiceVotesMap.containsKey(choice.getId())) {</span>
+<span class="nc" id="L85">                choiceResponse.setVoteCount(choiceVotesMap.get(choice.getId()));</span>
+            } else {
+<span class="nc" id="L87">                choiceResponse.setVoteCount(0);</span>
+            }
+<span class="nc" id="L89">            return choiceResponse;</span>
+<span class="nc" id="L90">        }).collect(Collectors.toList());</span>
+<span class="nc" id="L91">        pollResponse.setChoices(choiceResponses);</span>
+<span class="nc" id="L92">        UserSummary creatorSummary = new UserSummary(creator.getId(), creator.getUsername(), creator.getName());</span>
+<span class="nc" id="L93">        pollResponse.setCreatedBy(creatorSummary);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if(userVote != null) {</span>
+<span class="nc" id="L95">            pollResponse.setSelectedChoice(userVote);</span>
+        }
+<span class="nc" id="L97">        long totalVotes = pollResponse.getChoices().stream().mapToLong(ChoiceResponse::getVoteCount).sum();</span>
+<span class="nc" id="L98">        pollResponse.setTotalVotes(totalVotes);</span>
+<span class="nc" id="L99">        return pollResponse;</span>
+    }
+
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
