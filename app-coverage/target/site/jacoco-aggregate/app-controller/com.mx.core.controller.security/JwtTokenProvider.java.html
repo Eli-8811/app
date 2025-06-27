@@ -62,58 +62,40 @@ import java.util.Set;
 		
     }
     
-    /*
-    public String generateToken(Authentication authentication) {
-    	
-        UsuarioPrincipal userPrincipal = (UsuarioPrincipal) authentication.getPrincipal();
-
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
-        return Jwts.builder()
-                .setSubject(Long.toString(userPrincipal.getId()))
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-        
-    }
-    */
     public Long getUserIdFromJWT(String token) {
-<span class="nc" id="L83">        Claims claims = Jwts.parserBuilder()</span>
-<span class="nc" id="L84">                .setSigningKey(key)</span>
-<span class="nc" id="L85">                .build()</span>
-<span class="nc" id="L86">                .parseClaimsJws(token)</span>
-<span class="nc" id="L87">                .getBody();</span>
-
-<span class="nc" id="L89">        return Long.parseLong(claims.getSubject());</span>
+<span class="nc" id="L66">        Claims claims = Jwts.parserBuilder()</span>
+<span class="nc" id="L67">                .setSigningKey(key)</span>
+<span class="nc" id="L68">                .build()</span>
+<span class="nc" id="L69">                .parseClaimsJws(token)</span>
+<span class="nc" id="L70">                .getBody();</span>
+<span class="nc" id="L71">        return Long.parseLong(claims.getSubject());</span>
     }
 
     public boolean validateToken(String authToken) {
         try {
-<span class="nc" id="L94">            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);</span>
-<span class="nc" id="L95">            return true;</span>
-<span class="nc" id="L96">        } catch (SecurityException | MalformedJwtException ex) {</span>
-<span class="nc" id="L97">            log.error(&quot;Invalid JWT token&quot;);</span>
-<span class="nc" id="L98">        } catch (ExpiredJwtException ex) {</span>
-<span class="nc" id="L99">            log.error(&quot;Expired JWT token&quot;);</span>
-<span class="nc" id="L100">        } catch (UnsupportedJwtException ex) {</span>
-<span class="nc" id="L101">            log.error(&quot;Unsupported JWT token&quot;);</span>
-<span class="nc" id="L102">        } catch (IllegalArgumentException ex) {</span>
-<span class="nc" id="L103">            log.error(&quot;JWT claims string is empty.&quot;);</span>
-<span class="nc" id="L104">        }</span>
-<span class="nc" id="L105">        return false;</span>
+<span class="nc" id="L76">            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);</span>
+<span class="nc" id="L77">            return true;</span>
+<span class="nc" id="L78">        } catch (SecurityException | MalformedJwtException ex) {</span>
+<span class="nc" id="L79">            log.error(&quot;Invalid JWT token&quot;);</span>
+<span class="nc" id="L80">        } catch (ExpiredJwtException ex) {</span>
+<span class="nc" id="L81">            log.error(&quot;Expired JWT token&quot;);</span>
+<span class="nc" id="L82">        } catch (UnsupportedJwtException ex) {</span>
+<span class="nc" id="L83">            log.error(&quot;Unsupported JWT token&quot;);</span>
+<span class="nc" id="L84">        } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L85">            log.error(&quot;JWT claims string is empty.&quot;);</span>
+<span class="nc" id="L86">        }</span>
+<span class="nc" id="L87">        return false;</span>
     }
 
     public String generateTokenFromUserId(Long userId) {
-<span class="nc" id="L109">        Date now = new Date();</span>
-<span class="nc" id="L110">        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);</span>
-<span class="nc" id="L111">        return Jwts.builder()</span>
-<span class="nc" id="L112">                .setSubject(Long.toString(userId))</span>
-<span class="nc" id="L113">                .setIssuedAt(now)</span>
-<span class="nc" id="L114">                .setExpiration(expiryDate)</span>
-<span class="nc" id="L115">                .signWith(key, SignatureAlgorithm.HS512)</span>
-<span class="nc" id="L116">                .compact();</span>
+<span class="nc" id="L91">        Date now = new Date();</span>
+<span class="nc" id="L92">        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);</span>
+<span class="nc" id="L93">        return Jwts.builder()</span>
+<span class="nc" id="L94">                .setSubject(Long.toString(userId))</span>
+<span class="nc" id="L95">                .setIssuedAt(now)</span>
+<span class="nc" id="L96">                .setExpiration(expiryDate)</span>
+<span class="nc" id="L97">                .signWith(key, SignatureAlgorithm.HS512)</span>
+<span class="nc" id="L98">                .compact();</span>
     }
     
 }

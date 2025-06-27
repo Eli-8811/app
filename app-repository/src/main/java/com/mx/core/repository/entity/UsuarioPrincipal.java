@@ -37,14 +37,14 @@ public class UsuarioPrincipal implements UserDetails {
 	}
 
 	public static UsuarioPrincipal create(Usuario user) {
-		
+
 		Set<GrantedAuthority> authorities = new HashSet<>();
 		Set<String> permisos = new HashSet<>();
 
 		user.getRoles().forEach(role -> {
-			authorities.add(new SimpleGrantedAuthority(role.getName())); // e.g., "ROLE_SUPERADMIN, ROLE_ADMIN.."
+			authorities.add(new SimpleGrantedAuthority(role.getName().name()));
 			role.getPermissions().forEach(permission -> {
-				String permiso = permission.getName(); // e.g., "PERMISSION_MENU_000001, PERMISSION_MENU_000002,PERMISSION_MENU_000003..."
+				String permiso = permission.getName();
 				authorities.add(new SimpleGrantedAuthority(permiso));
 				permisos.add(permiso);
 			});
@@ -57,10 +57,10 @@ public class UsuarioPrincipal implements UserDetails {
 				user.getEmail(),
 				user.getPassword(),
 				authorities,
-				permisos);
-		
+				permisos
+		);
 	}
-
+	
 	public Long getId() {
 		return id;
 	}
