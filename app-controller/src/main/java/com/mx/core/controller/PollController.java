@@ -3,14 +3,19 @@ package com.mx.core.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mx.core.controller.security.CurrentUser;
 import com.mx.core.model.ResponseGeneric;
 import com.mx.core.model.payload.PollRequest;
+import com.mx.core.model.payload.PollResponse;
 import com.mx.core.repository.entity.Poll;
+import com.mx.core.repository.entity.UsuarioPrincipal;
 import com.mx.core.service.PollService;
 
 import jakarta.validation.Valid;
@@ -35,4 +40,11 @@ public class PollController {
 	    }
 	}
 	
+    @GetMapping("/{pollId}")
+    @PreAuthorize("hasRole('USER')")
+    public PollResponse getPollById(@CurrentUser UsuarioPrincipal currentUser,
+                                    @PathVariable Long pollId) {
+        return pollService.getPollById(pollId, currentUser);
+    }
+    
 }
