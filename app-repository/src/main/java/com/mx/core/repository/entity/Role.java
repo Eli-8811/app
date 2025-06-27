@@ -6,6 +6,8 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.mx.core.model.RoleName;
+
 @Entity
 @Table(name = "roles", uniqueConstraints = {
         @UniqueConstraint(columnNames = "name")
@@ -20,8 +22,9 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 60, nullable = false)
-    private String name;
+	@Enumerated(EnumType.STRING)
+	@Column(length = 60, nullable = false)
+	private RoleName name;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "role_permissions",

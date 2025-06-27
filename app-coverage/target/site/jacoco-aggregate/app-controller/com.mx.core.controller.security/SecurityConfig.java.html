@@ -56,45 +56,57 @@ public class SecurityConfig {
 <span class="nc" id="L56">        provider.setPasswordEncoder(passwordEncoder());</span>
 <span class="nc" id="L57">        return provider;</span>
     }
-
+    /*
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-<span class="nc" id="L62">        http</span>
-<span class="nc" id="L63">            .csrf(csrf -&gt; csrf.disable())</span>
-<span class="nc" id="L64">            .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
-<span class="nc" id="L65">            .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
-<span class="nc" id="L66">            .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
-<span class="nc" id="L67">            .authorizeHttpRequests(authz -&gt; authz</span>
-<span class="nc" id="L68">                .requestMatchers(</span>
-                    &quot;/&quot;, 
-                    &quot;/favicon.ico&quot;, 
-                    &quot;/auth/**&quot;
-<span class="nc" id="L72">                ).permitAll()</span>
-<span class="nc" id="L73">                .requestMatchers(&quot;/usuario/**&quot;).authenticated()</span>
-<span class="nc" id="L74">                .anyRequest().permitAll()</span>
+        http
+            .csrf(csrf -&gt; csrf.disable())
+            .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(authz -&gt; authz
+                .anyRequest().permitAll()
             );
-<span class="nc" id="L76">        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
-<span class="nc" id="L77">        return http.build();</span>
+        return http.build();
+    }
+    */
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="nc" id="L74">        http</span>
+<span class="nc" id="L75">            .csrf(csrf -&gt; csrf.disable())</span>
+<span class="nc" id="L76">            .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
+<span class="nc" id="L77">            .exceptionHandling(exception -&gt; exception.authenticationEntryPoint(unauthorizedHandler))</span>
+<span class="nc" id="L78">            .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="nc" id="L79">            .authorizeHttpRequests(authz -&gt; authz</span>
+<span class="nc" id="L80">                .requestMatchers(</span>
+                    &quot;/&quot;,
+                    &quot;/favicon.ico&quot;,
+                    &quot;/auth/**&quot;
+<span class="nc" id="L84">                ).permitAll()</span>
+<span class="nc" id="L85">                .requestMatchers(&quot;/usuario/**&quot;, &quot;/poll/**&quot;).authenticated()</span>
+<span class="nc" id="L86">                .anyRequest().permitAll()</span>
+            );   
+<span class="nc" id="L88">        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="nc" id="L89">        return http.build();</span>
     }
     
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-<span class="nc" id="L82">        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);</span>
-<span class="nc" id="L83">        builder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());</span>
-<span class="nc" id="L84">        return builder.build();</span>
+<span class="nc" id="L94">        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);</span>
+<span class="nc" id="L95">        builder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());</span>
+<span class="nc" id="L96">        return builder.build();</span>
     }
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-<span class="nc" id="L89">        CorsConfiguration configuration = new CorsConfiguration();</span>
-<span class="nc" id="L90">        configuration.setAllowedOriginPatterns(List.of(&quot;*&quot;));</span>
-<span class="nc" id="L91">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;PATCH&quot;));</span>
-<span class="nc" id="L92">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
-<span class="nc" id="L93">        configuration.setAllowCredentials(true);</span>
-<span class="nc" id="L94">        configuration.setMaxAge(3600L);</span>
-<span class="nc" id="L95">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
-<span class="nc" id="L96">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
-<span class="nc" id="L97">        return source;</span>
+<span class="nc" id="L101">        CorsConfiguration configuration = new CorsConfiguration();</span>
+<span class="nc" id="L102">        configuration.setAllowedOriginPatterns(List.of(&quot;*&quot;));</span>
+<span class="nc" id="L103">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;PATCH&quot;));</span>
+<span class="nc" id="L104">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
+<span class="nc" id="L105">        configuration.setAllowCredentials(true);</span>
+<span class="nc" id="L106">        configuration.setMaxAge(3600L);</span>
+<span class="nc" id="L107">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="nc" id="L108">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
+<span class="nc" id="L109">        return source;</span>
     }
     
 }

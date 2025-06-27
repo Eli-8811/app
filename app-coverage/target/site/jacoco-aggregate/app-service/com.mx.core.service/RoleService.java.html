@@ -16,9 +16,8 @@ public class RoleService {
 
 	private final RoleRepository roleRepository;
 
-	public Role findByName(RoleName roleName) {
-<span class="nc" id="L20">	    return roleRepository.findByName(roleName)</span>
-<span class="nc" id="L21">	            .orElseThrow(() -&gt; new RuntimeException(&quot;User Role not set.&quot;));</span>
+	public Role findByNameWithPermissions(RoleName roleName) {
+<span class="nc" id="L20">	    return roleRepository.findByNameWithPermissions(roleName).orElseThrow(() -&gt; new RuntimeException(&quot;User Role not set.&quot;));</span>
 	}
 	
 }

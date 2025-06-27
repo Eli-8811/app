@@ -79,7 +79,7 @@ public class AuthController {
         Role userRole = null;
         
         if (signUpRequest.getRoles() == null || signUpRequest.getRoles().isEmpty()) {
-        	 userRole = roleService.findByName(RoleName.ROLE_USER);
+        	 userRole = roleService.findByNameWithPermissions(RoleName.ROLE_USER);
         }
         
         Usuario user = Usuario.builder()

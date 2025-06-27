@@ -57,7 +57,7 @@ public class UsuarioController {
                     .body(ResponseGeneric.buildError("El correo electrónico ya está registrado"));
         }
 
-        Role userRoleDefault = roleService.findByName(RoleName.ROLE_USER);
+        Role userRoleDefault = roleService.findByNameWithPermissions(RoleName.ROLE_USER);
         
         if (userRoleDefault == null) {
             return ResponseEntity
@@ -77,7 +77,7 @@ public class UsuarioController {
                     .map(r -> {
                         try {
                             RoleName roleName = RoleName.valueOf(r.getName());
-                            Role foundRole = roleService.findByName(roleName);
+                            Role foundRole = roleService.findByNameWithPermissions(roleName);
                             if (foundRole == null) {
                                 throw new IllegalArgumentException("Rol no válido: " + r.getName());
                             }

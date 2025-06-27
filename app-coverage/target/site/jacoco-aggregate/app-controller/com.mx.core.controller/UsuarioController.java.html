@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">app-coverage</a> &gt; <a href="../index.html" class="el_bundle">app-controller</a> &gt; <a href="index.source.html" class="el_package">com.mx.core.controller</a> &gt; <span class="el_source">UsuarioController.java</span></div><h1>UsuarioController.java</h1><pre class="source lang-java linenums">package com.mx.core.controller;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,9 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="nc" id="L33">@Slf4j</span>
+<span class="nc" id="L34">@Slf4j</span>
 @Validated
-<span class="nc" id="L35">@AllArgsConstructor</span>
+<span class="nc" id="L36">@AllArgsConstructor</span>
 @RequestMapping(&quot;/usuario&quot;)
 @RestController
 public class UsuarioController {
@@ -44,65 +45,65 @@ public class UsuarioController {
     @PostMapping(&quot;/registrar&quot;)
     public ResponseEntity&lt;ResponseGeneric&lt;?&gt;&gt; registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
 
-<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (usuarioService.existsByUsername(signUpRequest.getUsername())) {</span>
-<span class="nc" id="L48">            return ResponseEntity</span>
-<span class="nc" id="L49">                    .status(HttpStatus.CONFLICT)</span>
-<span class="nc" id="L50">                    .body(ResponseGeneric.buildError(&quot;El username ya está en uso&quot;));</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (usuarioService.existsByUsername(signUpRequest.getUsername())) {</span>
+<span class="nc" id="L49">            return ResponseEntity</span>
+<span class="nc" id="L50">                    .status(HttpStatus.CONFLICT)</span>
+<span class="nc" id="L51">                    .body(ResponseGeneric.buildError(&quot;El username ya está en uso&quot;));</span>
         }
 
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (usuarioService.existsByEmail(signUpRequest.getEmail())) {</span>
-<span class="nc" id="L54">            return ResponseEntity</span>
-<span class="nc" id="L55">                    .status(HttpStatus.CONFLICT)</span>
-<span class="nc" id="L56">                    .body(ResponseGeneric.buildError(&quot;El correo electrónico ya está registrado&quot;));</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (usuarioService.existsByEmail(signUpRequest.getEmail())) {</span>
+<span class="nc" id="L55">            return ResponseEntity</span>
+<span class="nc" id="L56">                    .status(HttpStatus.CONFLICT)</span>
+<span class="nc" id="L57">                    .body(ResponseGeneric.buildError(&quot;El correo electrónico ya está registrado&quot;));</span>
         }
 
-<span class="nc" id="L59">        Role userRoleDefault = roleService.findByName(RoleName.ROLE_USER);</span>
+<span class="nc" id="L60">        Role userRoleDefault = roleService.findByNameWithPermissions(RoleName.ROLE_USER);</span>
         
-<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (userRoleDefault == null) {</span>
-<span class="nc" id="L62">            return ResponseEntity</span>
-<span class="nc" id="L63">                    .status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L64">                    .body(ResponseGeneric.buildError(&quot;No se encontró el rol de usuario por defecto&quot;));</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (userRoleDefault == null) {</span>
+<span class="nc" id="L63">            return ResponseEntity</span>
+<span class="nc" id="L64">                    .status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L65">                    .body(ResponseGeneric.buildError(&quot;No se encontró el rol de usuario por defecto&quot;));</span>
         }
 
         Set&lt;Role&gt; userRoles;
 
-<span class="nc bnc" id="L69" title="All 4 branches missed.">        if (signUpRequest.getRoles() == null || signUpRequest.getRoles().isEmpty()) {</span>
+<span class="nc bnc" id="L70" title="All 4 branches missed.">        if (signUpRequest.getRoles() == null || signUpRequest.getRoles().isEmpty()) {</span>
         	
-<span class="nc" id="L71">            userRoles = Set.of(userRoleDefault);</span>
+<span class="nc" id="L72">            userRoles = Set.of(userRoleDefault);</span>
             
         } else {
         	
-<span class="nc" id="L75">            userRoles = signUpRequest.getRoles().stream()</span>
-<span class="nc" id="L76">                    .map(r -&gt; {</span>
+<span class="nc" id="L76">            userRoles = signUpRequest.getRoles().stream()</span>
+<span class="nc" id="L77">                    .map(r -&gt; {</span>
                         try {
-<span class="nc" id="L78">                            RoleName roleName = RoleName.valueOf(r.getName());</span>
-<span class="nc" id="L79">                            Role foundRole = roleService.findByName(roleName);</span>
-<span class="nc bnc" id="L80" title="All 2 branches missed.">                            if (foundRole == null) {</span>
-<span class="nc" id="L81">                                throw new IllegalArgumentException(&quot;Rol no válido: &quot; + r.getName());</span>
+<span class="nc" id="L79">                            RoleName roleName = RoleName.valueOf(r.getName());</span>
+<span class="nc" id="L80">                            Role foundRole = roleService.findByNameWithPermissions(roleName);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                            if (foundRole == null) {</span>
+<span class="nc" id="L82">                                throw new IllegalArgumentException(&quot;Rol no válido: &quot; + r.getName());</span>
                             }
-<span class="nc" id="L83">                            return foundRole;</span>
-<span class="nc" id="L84">                        } catch (IllegalArgumentException e) {</span>
-<span class="nc" id="L85">                            throw new RuntimeException(&quot;Rol no reconocido: &quot; + r.getName(), e);</span>
+<span class="nc" id="L84">                            return foundRole;</span>
+<span class="nc" id="L85">                        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L86">                            throw new RuntimeException(&quot;Rol no reconocido: &quot; + r.getName(), e);</span>
                         }
                     })
-<span class="nc" id="L88">                    .collect(Collectors.toSet());</span>
+<span class="nc" id="L89">                    .collect(Collectors.toSet());</span>
             
         }
 
-<span class="nc" id="L92">        Usuario user = Usuario.builder()</span>
-<span class="nc" id="L93">                .name(signUpRequest.getName())</span>
-<span class="nc" id="L94">                .username(signUpRequest.getUsername())</span>
-<span class="nc" id="L95">                .email(signUpRequest.getEmail())</span>
-<span class="nc" id="L96">                .password(passwordEncoder.encode(signUpRequest.getPassword()))</span>
-<span class="nc" id="L97">                .roles(userRoles)</span>
-<span class="nc" id="L98">                .build();</span>
+<span class="nc" id="L93">        Usuario user = Usuario.builder()</span>
+<span class="nc" id="L94">                .name(signUpRequest.getName())</span>
+<span class="nc" id="L95">                .username(signUpRequest.getUsername())</span>
+<span class="nc" id="L96">                .email(signUpRequest.getEmail())</span>
+<span class="nc" id="L97">                .password(passwordEncoder.encode(signUpRequest.getPassword()))</span>
+<span class="nc" id="L98">                .roles(userRoles)</span>
+<span class="nc" id="L99">                .build();</span>
 
-<span class="nc" id="L100">        usuarioService.save(user);</span>
-<span class="nc" id="L101">        log.info(&quot;Nuevo usuario registrado: {}&quot;, user.getUsername());</span>
+<span class="nc" id="L101">        usuarioService.save(user);</span>
+<span class="nc" id="L102">        log.info(&quot;Nuevo usuario registrado: {}&quot;, user.getUsername());</span>
 
-<span class="nc" id="L103">        return ResponseEntity</span>
-<span class="nc" id="L104">                .status(HttpStatus.CREATED)</span>
-<span class="nc" id="L105">                .body(ResponseGeneric.buildSuccess(&quot;Usuario registrado exitosamente&quot;, user));</span>
+<span class="nc" id="L104">        return ResponseEntity</span>
+<span class="nc" id="L105">                .status(HttpStatus.CREATED)</span>
+<span class="nc" id="L106">                .body(ResponseGeneric.buildSuccess(&quot;Usuario registrado exitosamente&quot;, user));</span>
         
     }
     
@@ -111,23 +112,23 @@ public class UsuarioController {
 		
 	    try {
 	    	
-<span class="nc" id="L114">	    	Usuario safeUser = new Usuario();</span>
+<span class="nc" id="L115">	    	Usuario safeUser = new Usuario();</span>
 	    	
-<span class="nc" id="L116">	        Usuario user = usuarioService.findByIdWithRoles(id);</span>
+<span class="nc" id="L117">	        Usuario user = usuarioService.findByIdWithRoles(id);</span>
 	        
-<span class="nc" id="L118">	        safeUser.setId(user.getId());</span>
-<span class="nc" id="L119">	        safeUser.setName(user.getName());</span>
-<span class="nc" id="L120">	        safeUser.setUsername(user.getUsername());</span>
-<span class="nc" id="L121">	        safeUser.setEmail(user.getEmail());</span>
-<span class="nc" id="L122">	        safeUser.setRoles(user.getRoles());</span>
-<span class="nc" id="L123">	        safeUser.setCreatedAt(user.getCreatedAt());</span>
-<span class="nc" id="L124">	        safeUser.setUpdatedAt(user.getUpdatedAt());</span>
+<span class="nc" id="L119">	        safeUser.setId(user.getId());</span>
+<span class="nc" id="L120">	        safeUser.setName(user.getName());</span>
+<span class="nc" id="L121">	        safeUser.setUsername(user.getUsername());</span>
+<span class="nc" id="L122">	        safeUser.setEmail(user.getEmail());</span>
+<span class="nc" id="L123">	        safeUser.setRoles(user.getRoles());</span>
+<span class="nc" id="L124">	        safeUser.setCreatedAt(user.getCreatedAt());</span>
+<span class="nc" id="L125">	        safeUser.setUpdatedAt(user.getUpdatedAt());</span>
 
-<span class="nc" id="L126">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario encontrado&quot;, safeUser));</span>
+<span class="nc" id="L127">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario encontrado&quot;, safeUser));</span>
 	    
-<span class="nc" id="L128">	    } catch (RuntimeException e) {</span>
-<span class="nc" id="L129">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
-<span class="nc" id="L130">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+<span class="nc" id="L129">	    } catch (RuntimeException e) {</span>
+<span class="nc" id="L130">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L131">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
 	    }
 	    
 	}
@@ -139,34 +140,34 @@ public class UsuarioController {
 		
 	    try {
 	    	
-<span class="nc" id="L142">	        Usuario existingUser = usuarioService.findByIdWithRoles(id);</span>
-<span class="nc" id="L143">	        existingUser.setName(updateRequest.getName());</span>
-<span class="nc" id="L144">	        existingUser.setUsername(updateRequest.getUsername());</span>
-<span class="nc" id="L145">	        existingUser.setEmail(updateRequest.getEmail());</span>
-<span class="nc" id="L146">	        existingUser.setUpdatedAt(Instant.now());</span>
+<span class="nc" id="L143">	        Usuario existingUser = usuarioService.findByIdWithRoles(id);</span>
+<span class="nc" id="L144">	        existingUser.setName(updateRequest.getName());</span>
+<span class="nc" id="L145">	        existingUser.setUsername(updateRequest.getUsername());</span>
+<span class="nc" id="L146">	        existingUser.setEmail(updateRequest.getEmail());</span>
+<span class="nc" id="L147">	        existingUser.setUpdatedAt(Instant.now());</span>
 	        
-<span class="nc bnc" id="L148" title="All 2 branches missed.">	        if (usuarioService.existsByEmail(updateRequest.getEmail())</span>
-<span class="nc bnc" id="L149" title="All 2 branches missed.">	        	    &amp;&amp; !existingUser.getEmail().equals(updateRequest.getEmail())) {</span>
-<span class="nc" id="L150">	        	    return ResponseEntity</span>
-<span class="nc" id="L151">	        	        .status(HttpStatus.BAD_REQUEST)</span>
-<span class="nc" id="L152">	        	        .body(ResponseGeneric.buildError(&quot;El email ya está en uso por otro usuario&quot;));</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">	        if (usuarioService.existsByEmail(updateRequest.getEmail())</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">	        	    &amp;&amp; !existingUser.getEmail().equals(updateRequest.getEmail())) {</span>
+<span class="nc" id="L151">	        	    return ResponseEntity</span>
+<span class="nc" id="L152">	        	        .status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L153">	        	        .body(ResponseGeneric.buildError(&quot;El email ya está en uso por otro usuario&quot;));</span>
 	        }
 	        
-<span class="nc" id="L155">	        usuarioService.save(existingUser);</span>
-<span class="nc" id="L156">	        Usuario safeUser = new Usuario();</span>
-<span class="nc" id="L157">	        safeUser.setId(existingUser.getId());</span>
-<span class="nc" id="L158">	        safeUser.setName(existingUser.getName());</span>
-<span class="nc" id="L159">	        safeUser.setUsername(existingUser.getUsername());</span>
-<span class="nc" id="L160">	        safeUser.setEmail(existingUser.getEmail());</span>
-<span class="nc" id="L161">	        safeUser.setCreatedAt(existingUser.getCreatedAt());</span>
-<span class="nc" id="L162">	        safeUser.setUpdatedAt(existingUser.getUpdatedAt());</span>
+<span class="nc" id="L156">	        usuarioService.save(existingUser);</span>
+<span class="nc" id="L157">	        Usuario safeUser = new Usuario();</span>
+<span class="nc" id="L158">	        safeUser.setId(existingUser.getId());</span>
+<span class="nc" id="L159">	        safeUser.setName(existingUser.getName());</span>
+<span class="nc" id="L160">	        safeUser.setUsername(existingUser.getUsername());</span>
+<span class="nc" id="L161">	        safeUser.setEmail(existingUser.getEmail());</span>
+<span class="nc" id="L162">	        safeUser.setCreatedAt(existingUser.getCreatedAt());</span>
+<span class="nc" id="L163">	        safeUser.setUpdatedAt(existingUser.getUpdatedAt());</span>
 
-<span class="nc" id="L164">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario actualizado correctamente&quot;, safeUser));</span>
+<span class="nc" id="L165">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario actualizado correctamente&quot;, safeUser));</span>
 	        
-<span class="nc" id="L166">	    } catch (RuntimeException e) {</span>
-<span class="nc" id="L167">	    	e.printStackTrace();</span>
-<span class="nc" id="L168">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
-<span class="nc" id="L169">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+<span class="nc" id="L167">	    } catch (RuntimeException e) {</span>
+<span class="nc" id="L168">	    	e.printStackTrace();</span>
+<span class="nc" id="L169">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L170">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
 	    }
 	    
 	}
@@ -174,13 +175,19 @@ public class UsuarioController {
 	@DeleteMapping(&quot;/delete/{id}&quot;)
 	public ResponseEntity&lt;ResponseGeneric&lt;?&gt;&gt; deleteUser(@PathVariable Long id) {
 	    try {
-<span class="nc" id="L177">	        usuarioService.deleteById(id);</span>
-<span class="nc" id="L178">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario eliminado exitosamente&quot;, null));</span>
-<span class="nc" id="L179">	    } catch (RuntimeException e) {</span>
-<span class="nc" id="L180">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
-<span class="nc" id="L181">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+<span class="nc" id="L178">	        usuarioService.deleteById(id);</span>
+<span class="nc" id="L179">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario eliminado exitosamente&quot;, null));</span>
+<span class="nc" id="L180">	    } catch (RuntimeException e) {</span>
+<span class="nc" id="L181">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L182">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
 	    }
 	}
 	
+    @GetMapping(&quot;/listar&quot;)
+    public ResponseEntity&lt;ResponseGeneric&lt;List&lt;Usuario&gt;&gt;&gt; getAllUsers() {
+<span class="nc" id="L188">        List&lt;Usuario&gt; usuarios = usuarioService.getAllUsersWithRolesAndPermissions();</span>
+<span class="nc" id="L189">        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuarios encontrados&quot;, usuarios));</span>
+    }
+    
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

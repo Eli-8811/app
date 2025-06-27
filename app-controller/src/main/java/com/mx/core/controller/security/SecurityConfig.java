@@ -78,13 +78,13 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
-                    "/", 
-                    "/favicon.ico", 
+                    "/",
+                    "/favicon.ico",
                     "/auth/**"
                 ).permitAll()
-                .requestMatchers("/usuario/**").authenticated()
+                .requestMatchers("/usuario/**", "/poll/**").authenticated()
                 .anyRequest().permitAll()
-            );
+            );   
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
