@@ -17,7 +17,7 @@ import com.mx.core.model.payload.PollResponse;
 import com.mx.core.model.payload.UserSummary;
 import com.mx.core.model.payload.VoteRequest;
 import com.mx.core.repository.PollRepository;
-import com.mx.core.repository.UsuarioRepository;
+import com.mx.core.repository.UserRepository;
 import com.mx.core.repository.VoteRepository;
 import com.mx.core.repository.entity.Choice;
 import com.mx.core.repository.entity.ChoiceVoteCount;
@@ -36,7 +36,7 @@ public class PollService {
 
 	private final PollRepository pollRepository;
 	private final VoteRepository voteRepository;
-	private final UsuarioRepository usuarioRepository;
+	private final UserRepository usuarioRepository;
 	
     public Poll createPoll(PollRequest pollRequest) {
     	

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">app-coverage</a> &gt; <a href="../index.html" class="el_bundle">app-controller</a> &gt; <a href="index.source.html" class="el_package">com.mx.core.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.mx.core.controller;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mx.core.model.ResponseGeneric;
+import com.mx.core.model.payload.SignUpRequest;
+import com.mx.core.model.payload.UsuarioUpdateRequest;
+import com.mx.core.repository.entity.Role;
+import com.mx.core.repository.entity.Usuario;
+import com.mx.core.service.UserService;
+
+import jakarta.validation.Valid;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="nc" id="L32">@Slf4j</span>
+@Validated
+<span class="nc" id="L34">@AllArgsConstructor</span>
+@RequestMapping(&quot;/usuario&quot;)
+@RestController
+public class UserController {
+	
+	private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    
+    @PostMapping(&quot;/registrar&quot;)
+    public ResponseEntity&lt;ResponseGeneric&lt;?&gt;&gt; registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (userService.existsByEmail(signUpRequest.getEmail())) {</span>
+<span class="nc" id="L46">            return ResponseEntity</span>
+<span class="nc" id="L47">                    .status(HttpStatus.CONFLICT)</span>
+<span class="nc" id="L48">                    .body(ResponseGeneric.buildError(&quot;El correo electrónico ya está registrado.&quot;));</span>
+        }
+        
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (userService.existsByUsername(signUpRequest.getUsername())) {</span>
+<span class="nc" id="L52">            return ResponseEntity</span>
+<span class="nc" id="L53">                    .status(HttpStatus.CONFLICT)</span>
+<span class="nc" id="L54">                    .body(ResponseGeneric.buildError(&quot;El username ya está en uso.&quot;));</span>
+        }
+
+<span class="nc" id="L57">    	Set&lt;Role&gt; userRoles = userService.setRolesByUser(signUpRequest);</span>
+    	
+<span class="nc" id="L59">        Usuario user = Usuario.builder()</span>
+<span class="nc" id="L60">                .name(signUpRequest.getName())</span>
+<span class="nc" id="L61">                .lastname(signUpRequest.getLastname())</span>
+<span class="nc" id="L62">                .username(signUpRequest.getUsername())</span>
+<span class="nc" id="L63">                .mobile(signUpRequest.getMobile())</span>
+<span class="nc" id="L64">                .email(signUpRequest.getEmail())</span>
+<span class="nc" id="L65">                .password(passwordEncoder.encode(signUpRequest.getPassword()))</span>
+<span class="nc" id="L66">                .gender(signUpRequest.getGender())</span>
+<span class="nc" id="L67">                .born(signUpRequest.getBorn())</span>
+<span class="nc" id="L68">                .roles(userRoles)</span>
+<span class="nc" id="L69">                .build();</span>
+
+<span class="nc" id="L71">        userService.save(user);</span>
+<span class="nc" id="L72">        log.info(&quot;Nuevo usuario registrado: {}&quot;, user.getUsername());</span>
+
+<span class="nc" id="L74">        return ResponseEntity</span>
+<span class="nc" id="L75">                .status(HttpStatus.CREATED)</span>
+<span class="nc" id="L76">                .body(ResponseGeneric.buildSuccess(&quot;Usuario registrado exitosamente.&quot;, user));</span>
+        
+    }
+    
+	@GetMapping(&quot;/consultar/{id}&quot;)
+	public ResponseEntity&lt;ResponseGeneric&lt;?&gt;&gt; getUserById(@PathVariable Long id) {
+		
+	    try {
+	    	
+<span class="nc" id="L85">	    	Usuario safeUser = new Usuario();</span>
+	    	
+<span class="nc" id="L87">	        Usuario user = userService.findByIdWithRoles(id);</span>
+	        
+<span class="nc" id="L89">	        safeUser.setId(user.getId());</span>
+<span class="nc" id="L90">	        safeUser.setName(user.getName());</span>
+<span class="nc" id="L91">	        safeUser.setUsername(user.getUsername());</span>
+<span class="nc" id="L92">	        safeUser.setEmail(user.getEmail());</span>
+<span class="nc" id="L93">	        safeUser.setRoles(user.getRoles());</span>
+<span class="nc" id="L94">	        safeUser.setCreatedAt(user.getCreatedAt());</span>
+<span class="nc" id="L95">	        safeUser.setUpdatedAt(user.getUpdatedAt());</span>
+
+<span class="nc" id="L97">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario encontrado&quot;, safeUser));</span>
+	    
+<span class="nc" id="L99">	    } catch (RuntimeException e) {</span>
+<span class="nc" id="L100">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L101">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+	    }
+	    
+	}
+	
+	@PutMapping(&quot;/actualizar/{id}&quot;)
+	public ResponseEntity&lt;ResponseGeneric&lt;?&gt;&gt; updateUser(
+			@PathVariable Long id,
+			@RequestBody UsuarioUpdateRequest updateRequest) {
+		
+	    try {
+	    	
+<span class="nc" id="L113">	        Usuario existingUser = userService.findByIdWithRoles(id);</span>
+<span class="nc" id="L114">	        existingUser.setName(updateRequest.getName());</span>
+<span class="nc" id="L115">	        existingUser.setUsername(updateRequest.getUsername());</span>
+<span class="nc" id="L116">	        existingUser.setEmail(updateRequest.getEmail());</span>
+<span class="nc" id="L117">	        existingUser.setUpdatedAt(Instant.now());</span>
+	        
+<span class="nc bnc" id="L119" title="All 2 branches missed.">	        if (userService.existsByEmail(updateRequest.getEmail())</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">	        	    &amp;&amp; !existingUser.getEmail().equals(updateRequest.getEmail())) {</span>
+<span class="nc" id="L121">	        	    return ResponseEntity</span>
+<span class="nc" id="L122">	        	        .status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L123">	        	        .body(ResponseGeneric.buildError(&quot;El email ya está en uso por otro usuario&quot;));</span>
+	        }
+	        
+<span class="nc" id="L126">	        userService.save(existingUser);</span>
+<span class="nc" id="L127">	        Usuario safeUser = new Usuario();</span>
+<span class="nc" id="L128">	        safeUser.setId(existingUser.getId());</span>
+<span class="nc" id="L129">	        safeUser.setName(existingUser.getName());</span>
+<span class="nc" id="L130">	        safeUser.setUsername(existingUser.getUsername());</span>
+<span class="nc" id="L131">	        safeUser.setEmail(existingUser.getEmail());</span>
+<span class="nc" id="L132">	        safeUser.setGender(existingUser.getGender());</span>
+<span class="nc" id="L133">	        safeUser.setActive(existingUser.getActive());</span>
+<span class="nc" id="L134">	        safeUser.setCreatedAt(existingUser.getCreatedAt());</span>
+<span class="nc" id="L135">	        safeUser.setUpdatedAt(existingUser.getUpdatedAt());</span>
+
+<span class="nc" id="L137">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario actualizado correctamente&quot;, safeUser));</span>
+	        
+<span class="nc" id="L139">	    } catch (RuntimeException e) {</span>
+<span class="nc" id="L140">	    	e.printStackTrace();</span>
+<span class="nc" id="L141">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L142">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+	    }
+	    
+	}
+	
+	@DeleteMapping(&quot;/delete/{id}&quot;)
+	public ResponseEntity&lt;ResponseGeneric&lt;?&gt;&gt; deleteUser(@PathVariable Long id) {
+	    try {
+<span class="nc" id="L150">	    	userService.deleteById(id);</span>
+<span class="nc" id="L151">	        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuario eliminado exitosamente&quot;, null));</span>
+<span class="nc" id="L152">	    } catch (RuntimeException e) {</span>
+<span class="nc" id="L153">	        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L154">	                .body(ResponseGeneric.buildError(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+	    }
+	}
+	
+    @GetMapping(&quot;/listar&quot;)
+    public ResponseEntity&lt;ResponseGeneric&lt;List&lt;Usuario&gt;&gt;&gt; getAllUsers() {
+<span class="nc" id="L160">        List&lt;Usuario&gt; usuarios = userService.getAllUsersWithRolesAndPermissions();</span>
+<span class="nc" id="L161">        return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Usuarios encontrados&quot;, usuarios));</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

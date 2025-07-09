@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">app-coverage</a> &gt; <a href="../index.html" class="el_bundle">app-service</a> &gt; <a href="index.source.html" class="el_package">com.mx.core.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.mx.core.service;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
+import com.mx.core.model.RoleName;
+import com.mx.core.model.payload.RoleRequest;
+import com.mx.core.model.payload.SignUpRequest;
+import com.mx.core.repository.UserRepository;
+import com.mx.core.repository.entity.Role;
+import com.mx.core.repository.entity.Usuario;
+
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="nc" id="L19">@Slf4j</span>
+@Service
+<span class="nc" id="L21">@AllArgsConstructor</span>
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final RoleService roleService;
+
+	public boolean existsByUsername(String username) {
+<span class="nc" id="L28">		return userRepository.existsByUsername(username);</span>
+	}
+
+	public boolean existsByEmail(String email) {
+<span class="nc" id="L32">		return userRepository.existsByEmail(email);</span>
+	}
+
+	public Usuario findByIdWithRoles(Long userId) {
+<span class="nc" id="L36">	    return userRepository.findByIdWithRoles(userId).orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado con ID: &quot; + userId));</span>
+	}
+
+	public void save(Usuario user) {
+<span class="nc" id="L40">		userRepository.save(user);</span>
+<span class="nc" id="L41">	}</span>
+
+	public void deleteById(Long id) {
+<span class="nc" id="L44">	    Usuario usuario = userRepository.findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;Usuario no encontrado con ID: &quot; + id));</span>
+<span class="nc" id="L45">	    userRepository.delete(usuario);</span>
+<span class="nc" id="L46">	}</span>
+	
+    public List&lt;Usuario&gt; getAllUsersWithRolesAndPermissions() {
+<span class="nc" id="L49">        return userRepository.findAllWithRolesAndPermissions();</span>
+    }
+
+	public Set&lt;Role&gt; setRolesByUser(@Valid SignUpRequest signUpRequest) {		
+<span class="nc" id="L53">		Set&lt;Role&gt; userRoles = new HashSet&lt;&gt;();		</span>
+<span class="nc" id="L54">        Role userRoleDefault = roleService.findByNameWithPermissions(RoleName.ROLE_USER);       </span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (userRoleDefault == null) {</span>
+<span class="nc" id="L56">            throw new IllegalArgumentException(&quot;No se encontró el rol de usuario por defecto.&quot;);</span>
+        }
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        if (signUpRequest.getRoles() == null || signUpRequest.getRoles().isEmpty()) {        	</span>
+<span class="nc" id="L59">            userRoles = Set.of(userRoleDefault);            </span>
+        } else {
+        	
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        	for (RoleRequest r : signUpRequest.getRoles()) {</span>
+        	    try {
+<span class="nc" id="L64">        	    	Role foundRole = roleService.findByIdWithPermissions(r.getId());</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        	        if (foundRole == null) {</span>
+<span class="nc" id="L66">        	            throw new IllegalArgumentException(&quot;Rol no válido: &quot; + r.getName());</span>
+        	        }
+<span class="nc" id="L68">        	        userRoles.add(foundRole);</span>
+<span class="nc" id="L69">        	    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L70">        	        throw new RuntimeException(&quot;Rol no reconocido: &quot; + r.getName(), e);</span>
+<span class="nc" id="L71">        	    }</span>
+<span class="nc" id="L72">        	}            </span>
+        }
+<span class="nc" id="L74">		return userRoles;</span>
+	}
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

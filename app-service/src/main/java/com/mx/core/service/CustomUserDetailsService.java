@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mx.core.common.exception.ResourceNotFoundException;
-import com.mx.core.repository.UsuarioRepository;
+import com.mx.core.repository.UserRepository;
 import com.mx.core.repository.entity.Usuario;
 import com.mx.core.repository.entity.UsuarioPrincipal;
 
@@ -17,7 +17,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-	private final UsuarioRepository userRepository;
+	private final UserRepository userRepository;
 
 	@Override
 	@Transactional
