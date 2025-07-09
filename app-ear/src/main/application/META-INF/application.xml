@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/application_7.xsd" version="7">
+  <description>Parent pom providing dependency and plugin management for applications built with Maven</description>
+  <display-name>app-api</display-name>
+  <module>
+    <web>
+      <web-uri>app-api.war</web-uri>
+      <context-root>/app-api</context-root>
+    </web>
+  </module>
+</application>

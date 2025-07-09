@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>DocumentumController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">app-coverage</a> &gt; <a href="../index.html" class="el_bundle">app-controller</a> &gt; <a href="index.source.html" class="el_package">com.mx.core.controller</a> &gt; <span class="el_source">DocumentumController.java</span></div><h1>DocumentumController.java</h1><pre class="source lang-java linenums">package com.mx.core.controller;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+
+import org.apache.commons.io.FileUtils;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.mx.core.model.ArchivoDTO;
+import com.mx.core.model.ResponseGeneric;
+
+import lombok.extern.slf4j.Slf4j;
+
+<span class="nc" id="L29">@Slf4j</span>
+@RestController
+@RequestMapping(&quot;/documentum&quot;)
+<span class="nc" id="L32">public class DocumentumController {</span>
+
+	@PostMapping
+	public ResponseEntity&lt;ResponseGeneric&lt;String&gt;&gt; checkStatusFtp() {
+
+<span class="nc" id="L37">	    DateTimeFormatter folderFormatter = DateTimeFormatter.ofPattern(&quot;yyyyMMddHHmmss&quot;);</span>
+<span class="nc" id="L38">	    DateTimeFormatter fileFormatter = DateTimeFormatter.ofPattern(&quot;yyyyMMdd_HHmmss&quot;);</span>
+
+<span class="nc" id="L40">	    LocalDateTime now = LocalDateTime.now();</span>
+<span class="nc" id="L41">	    String folderName = now.format(folderFormatter);       // carpeta: yyyyMMddHHmmss</span>
+<span class="nc" id="L42">	    String timestamp = now.format(fileFormatter);          // texto dentro del PDF: yyyyMMdd_HHmmss</span>
+
+<span class="nc" id="L44">	    String baseFolder = &quot;src/main/resources/Documentos/&quot;;</span>
+<span class="nc" id="L45">	    File directory = new File(baseFolder + folderName);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">	    if (!directory.exists()) {</span>
+<span class="nc" id="L47">	        directory.mkdirs();</span>
+	    }
+
+<span class="nc" id="L50">	    String fileName = &quot;archivo_&quot; + generateRandomString(3) + &quot;.pdf&quot;;</span>
+<span class="nc" id="L51">	    String filePath = directory.getAbsolutePath() + &quot;/&quot; + fileName;</span>
+
+	    try {
+	    	
+<span class="nc" id="L55">	        Document document = new Document();</span>
+<span class="nc" id="L56">	        PdfWriter.getInstance(document, new FileOutputStream(filePath));</span>
+<span class="nc" id="L57">	        document.open();</span>
+<span class="nc" id="L58">	        document.add(new Paragraph(&quot;Archivo generado el &quot; + timestamp));</span>
+<span class="nc" id="L59">	        document.close();</span>
+
+<span class="nc" id="L61">	        log.debug(&quot;Archivo PDF creado: &quot; + filePath);</span>
+
+<span class="nc" id="L63">	    } catch (Exception e) {</span>
+<span class="nc" id="L64">	        e.printStackTrace();</span>
+<span class="nc" id="L65">	        return ResponseEntity.internalServerError()</span>
+<span class="nc" id="L66">	            .body(ResponseGeneric.buildError(&quot;Error al generar el PDF&quot;));</span>
+<span class="nc" id="L67">	    }</span>
+
+<span class="nc" id="L69">	    return ResponseEntity.ok(ResponseGeneric.buildSuccess(&quot;Archivo PDF creado&quot;, filePath));</span>
+	    
+	}
+	
+	@GetMapping
+    public ResponseEntity&lt;List&lt;ArchivoDTO&gt;&gt; getDocumentTree() {
+<span class="nc" id="L75">        String basePath = &quot;src/main/resources/Documentos/&quot;;</span>
+<span class="nc" id="L76">        File rootFolder = new File(basePath);</span>
+<span class="nc bnc" id="L77" title="All 4 branches missed.">        if (!rootFolder.exists() || !rootFolder.isDirectory()) {</span>
+<span class="nc" id="L78">            return ResponseEntity.badRequest().build();</span>
+        }
+<span class="nc" id="L80">        List&lt;ArchivoDTO&gt; children = scanFolderRecursive(rootFolder);</span>
+<span class="nc" id="L81">        ArchivoDTO rootNode = new ArchivoDTO(&quot;root&quot;, &quot;Documentos&quot;, children);</span>
+<span class="nc" id="L82">        return ResponseEntity.ok(List.of(rootNode));</span>
+    }
+    
+    @GetMapping(&quot;/base64&quot;)
+    public ResponseEntity&lt;ResponseGeneric&lt;String&gt;&gt; getFileAsBase64(
+            @RequestParam String path) {
+
+        try {
+        	
+<span class="nc" id="L91">            String baseDir = &quot;src/main/resources/&quot;;</span>
+<span class="nc" id="L92">            File file = new File(baseDir + path);</span>
+
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (!file.exists()) {</span>
+<span class="nc" id="L95">                return ResponseEntity.badRequest().body(</span>
+<span class="nc" id="L96">                        ResponseGeneric.buildError(&quot;El archivo no existe: &quot; + path));</span>
+            }
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if (file.isDirectory()) {</span>
+<span class="nc" id="L100">                return ResponseEntity.badRequest().body(</span>
+<span class="nc" id="L101">                        ResponseGeneric.buildError(&quot;La ruta no es un archivo: &quot; + path));</span>
+            }
+
+<span class="nc" id="L104">            byte[] content = FileUtils.readFileToByteArray(file);</span>
+<span class="nc" id="L105">            String base64 = Base64.getEncoder().encodeToString(content);</span>
+
+<span class="nc" id="L107">            return ResponseEntity.ok(</span>
+<span class="nc" id="L108">                    ResponseGeneric.buildSuccess(&quot;Archivo convertido exitosamente&quot;, base64));</span>
+<span class="nc" id="L109">        } catch (Exception e) {</span>
+<span class="nc" id="L110">            return ResponseEntity.internalServerError().body(</span>
+<span class="nc" id="L111">                    ResponseGeneric.buildError(&quot;Error al convertir archivo: &quot; + e.getMessage()));</span>
+        }
+    }
+    
+	private String generateRandomString(int length) {
+<span class="nc" id="L116">	    String chars = &quot;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&quot;;</span>
+<span class="nc" id="L117">	    StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L118">	    Random random = new Random();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">	    for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L120">	        sb.append(chars.charAt(random.nextInt(chars.length())));</span>
+	    }
+<span class="nc" id="L122">	    return sb.toString();</span>
+	}
+
+    private List&lt;ArchivoDTO&gt; scanFolderRecursive(File folder) {
+<span class="nc" id="L126">        List&lt;ArchivoDTO&gt; lista = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L127">        File[] contenidos = folder.listFiles();</span>
+
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (contenidos != null) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            for (File archivo : contenidos) {</span>
+<span class="nc" id="L131">                String id = UUID.randomUUID().toString();</span>
+<span class="nc" id="L132">                String nombre = archivo.getName();</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                if (archivo.isDirectory()) {</span>
+<span class="nc" id="L134">                    List&lt;ArchivoDTO&gt; hijos = scanFolderRecursive(archivo);</span>
+<span class="nc" id="L135">                    lista.add(new ArchivoDTO(id, nombre, hijos));</span>
+<span class="nc" id="L136">                } else {</span>
+<span class="nc" id="L137">                    lista.add(new ArchivoDTO(id, nombre));</span>
+                }
+            }
+        }
+<span class="nc" id="L141">        return lista;</span>
+    }
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

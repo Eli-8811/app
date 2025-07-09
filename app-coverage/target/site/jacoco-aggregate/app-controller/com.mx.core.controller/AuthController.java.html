@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AuthController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">app-coverage</a> &gt; <a href="../index.html" class="el_bundle">app-controller</a> &gt; <a href="index.source.html" class="el_package">com.mx.core.controller</a> &gt; <span class="el_source">AuthController.java</span></div><h1>AuthController.java</h1><pre class="source lang-java linenums">package com.mx.core.controller;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import com.mx.core.common.exception.AppBadCredentialsException;
+import com.mx.core.controller.security.JwtTokenProvider;
+import com.mx.core.model.ResponseGeneric;
+import com.mx.core.model.RoleName;
+import com.mx.core.model.payload.JwtAuthenticationResponse;
+import com.mx.core.model.payload.RoleRequest;
+import com.mx.core.model.payload.SignInRequest;
+import com.mx.core.model.payload.SignUpRequest;
+import com.mx.core.repository.entity.Role;
+import com.mx.core.repository.entity.Usuario;
+import com.mx.core.service.RoleService;
+import com.mx.core.service.UsuarioService;
+
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="nc" id="L34">@Slf4j</span>
+@Validated
+<span class="nc" id="L36">@AllArgsConstructor</span>
+@RequestMapping(&quot;/auth&quot;)
+@RestController
+public class AuthController {
+
+	private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider tokenProvider;
+	private final RoleService roleService;
+	private final UsuarioService usuarioService;
+    private final PasswordEncoder passwordEncoder;
+    
+    @PostMapping(&quot;/signin&quot;)
+    public ResponseEntity&lt;?&gt; authenticateUser(@Valid @RequestBody SignInRequest loginRequest) {
+        try {
+<span class="nc" id="L50">            Authentication authentication = authenticationManager.authenticate(</span>
+                new UsernamePasswordAuthenticationToken(
+<span class="nc" id="L52">                    loginRequest.getUsernameOrEmail(),</span>
+<span class="nc" id="L53">                    loginRequest.getPassword()</span>
+                )
+            );
+<span class="nc" id="L56">            SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="nc" id="L57">            String jwt = tokenProvider.generateToken(authentication);</span>
+<span class="nc" id="L58">            log.debug(jwt);</span>
+<span class="nc" id="L59">            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, &quot;Bearer&quot;));</span>
+<span class="nc" id="L60">        } catch (BadCredentialsException ex) {</span>
+<span class="nc" id="L61">            throw new AppBadCredentialsException(&quot;401&quot;, &quot;Autenticación fallida&quot;, &quot;Usuario o contraseña incorrectos&quot;);</span>
+        }
+    }
+
+    @PostMapping(&quot;/signup&quot;)
+    public ResponseEntity&lt;ResponseGeneric&lt;?&gt;&gt; registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (usuarioService.existsByEmail(signUpRequest.getEmail())) {</span>
+<span class="nc" id="L69">            return ResponseEntity</span>
+<span class="nc" id="L70">                    .status(HttpStatus.CONFLICT)</span>
+<span class="nc" id="L71">                    .body(ResponseGeneric.buildError(&quot;El correo electrónico ya está registrado.&quot;));</span>
+        }
+        
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (usuarioService.existsByUsername(signUpRequest.getUsername())) {</span>
+<span class="nc" id="L75">            return ResponseEntity</span>
+<span class="nc" id="L76">                    .status(HttpStatus.CONFLICT)</span>
+<span class="nc" id="L77">                    .body(ResponseGeneric.buildError(&quot;El username ya está en uso.&quot;));</span>
+        }
+
+<span class="nc" id="L80">        Role userRoleDefault = roleService.findByNameWithPermissions(RoleName.ROLE_USER);</span>
+        
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (userRoleDefault == null) {</span>
+<span class="nc" id="L83">            return ResponseEntity</span>
+<span class="nc" id="L84">                    .status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L85">                    .body(ResponseGeneric.buildError(&quot;No se encontró el rol de usuario por defecto.&quot;));</span>
+        }
+        
+<span class="nc" id="L88">    	Set&lt;Role&gt; userRoles = new HashSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L90" title="All 4 branches missed.">        if (signUpRequest.getRoles() == null || signUpRequest.getRoles().isEmpty()) {</span>
+        	
+<span class="nc" id="L92">            userRoles = Set.of(userRoleDefault);</span>
+            
+        } else {
+        	
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        	for (RoleRequest r : signUpRequest.getRoles()) {</span>
+        	    try {
+<span class="nc" id="L98">        	    	Role foundRole = roleService.findByIdWithPermissions(r.getId());</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        	        if (foundRole == null) {</span>
+<span class="nc" id="L100">        	            throw new IllegalArgumentException(&quot;Rol no válido: &quot; + r.getName());</span>
+        	        }
+<span class="nc" id="L102">        	        userRoles.add(foundRole);</span>
+<span class="nc" id="L103">        	    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L104">        	        throw new RuntimeException(&quot;Rol no reconocido: &quot; + r.getName(), e);</span>
+<span class="nc" id="L105">        	    }</span>
+<span class="nc" id="L106">        	}</span>
+            
+        }
+
+<span class="nc" id="L110">        Usuario user = Usuario.builder()</span>
+<span class="nc" id="L111">                .name(signUpRequest.getName())</span>
+<span class="nc" id="L112">                .username(signUpRequest.getUsername())</span>
+<span class="nc" id="L113">                .email(signUpRequest.getEmail())</span>
+<span class="nc" id="L114">                .password(passwordEncoder.encode(signUpRequest.getPassword()))</span>
+<span class="nc" id="L115">                .gender(signUpRequest.getGender())</span>
+<span class="nc" id="L116">                .roles(userRoles)</span>
+<span class="nc" id="L117">                .build();</span>
+
+<span class="nc" id="L119">        usuarioService.save(user);</span>
+<span class="nc" id="L120">        log.info(&quot;Nuevo usuario registrado: {}&quot;, user.getUsername());</span>
+
+<span class="nc" id="L122">        return ResponseEntity</span>
+<span class="nc" id="L123">                .status(HttpStatus.CREATED)</span>
+<span class="nc" id="L124">                .body(ResponseGeneric.buildSuccess(&quot;Usuario registrado exitosamente.&quot;, user));</span>
+        
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,20 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+app-coverage/app-common,com.mx.core.common,Util,3,0,0,0,1,0,1,0,1,0
+app-coverage/app-service,com.mx.core.service,CustomUserDetailsService,44,0,0,0,6,0,5,0,5,0
+app-coverage/app-service,com.mx.core.service,RoleService,62,0,0,0,7,0,9,0,9,0
+app-coverage/app-service,com.mx.core.service,PollService,386,0,10,0,66,0,20,0,15,0
+app-coverage/app-service,com.mx.core.service,UsuarioService,67,0,0,0,11,0,10,0,10,0
+app-coverage/app-service,com.mx.core.service,VolatilityService.new ParameterizedTypeReference() {...},6,0,0,0,1,0,1,0,1,0
+app-coverage/app-service,com.mx.core.service,VolatilityService,297,0,24,0,59,0,17,0,5,0
+app-coverage/app-service,com.mx.core.service,VolatilityService.new ParameterizedTypeReference() {...},6,0,0,0,1,0,1,0,1,0
+app-coverage/app-controller,com.mx.core.controller,RoleController,24,0,0,0,6,0,3,0,3,0
+app-coverage/app-controller,com.mx.core.controller,AuthController,191,0,14,0,49,0,11,0,4,0
+app-coverage/app-controller,com.mx.core.controller,PollController,38,0,0,0,8,0,4,0,4,0
+app-coverage/app-controller,com.mx.core.controller,UsuarioController,326,0,18,0,88,0,16,0,7,0
+app-coverage/app-controller,com.mx.core.controller,DocumentumController,254,0,18,0,65,0,16,0,7,0
+app-coverage/app-controller,com.mx.core.controller,HealthCheckController,18,0,0,0,4,0,3,0,3,0
+app-coverage/app-controller,com.mx.core.controller,VolatilityController,45,0,0,0,10,0,3,0,3,0
+app-coverage/app-controller,com.mx.core.controller.security,JwtAuthenticationFilter,77,0,8,0,18,0,8,0,4,0
+app-coverage/app-controller,com.mx.core.controller.security,JwtAuthenticationEntryPoint,18,0,0,0,5,0,3,0,3,0
+app-coverage/app-controller,com.mx.core.controller.security,JwtTokenProvider,182,0,4,0,51,0,9,0,7,0
+app-coverage/app-controller,com.mx.core.controller.security,SecurityConfig,169,0,0,0,34,0,12,0,12,0
