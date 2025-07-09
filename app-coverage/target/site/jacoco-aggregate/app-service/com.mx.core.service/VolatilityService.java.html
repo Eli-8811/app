@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>VolatilityService.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">app-coverage</a> &gt; <a href="../index.html" class="el_bundle">app-service</a> &gt; <a href="index.source.html" class="el_package">com.mx.core.service</a> &gt; <span class="el_source">VolatilityService.java</span></div><h1>VolatilityService.java</h1><pre class="source lang-java linenums">package com.mx.core.service;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="nc" id="L18">@Slf4j</span>
+@Service
+<span class="nc" id="L20">@AllArgsConstructor</span>
+public class VolatilityService {
+
+    private static final String BINANCE_URL = &quot;https://api.binance.com/api/v3/klines&quot;;
+<span class="nc" id="L24">    private final RestTemplate restTemplate = new RestTemplate();</span>
+
+    public double calculateVolatility(String symbol, String interval, int limit) {
+    	
+<span class="nc" id="L28">        URI uri = UriComponentsBuilder.fromHttpUrl(BINANCE_URL)</span>
+<span class="nc" id="L29">            .queryParam(&quot;symbol&quot;, symbol)</span>
+<span class="nc" id="L30">            .queryParam(&quot;interval&quot;, interval)</span>
+<span class="nc" id="L31">            .queryParam(&quot;limit&quot;, limit)</span>
+<span class="nc" id="L32">            .encode(StandardCharsets.UTF_8)</span>
+<span class="nc" id="L33">            .build()</span>
+<span class="nc" id="L34">            .toUri();</span>
+
+<span class="nc" id="L36">        ResponseEntity&lt;List&lt;List&lt;Object&gt;&gt;&gt; response = restTemplate.exchange(</span>
+        	    uri,
+        	    HttpMethod.GET,
+        	    null,
+<span class="nc" id="L40">        	    new ParameterizedTypeReference&lt;List&lt;List&lt;Object&gt;&gt;&gt;() {}</span>
+        	);
+        
+<span class="nc" id="L43">        List&lt;?&gt; klinesRaw = response.getBody();</span>
+<span class="nc bnc" id="L44" title="All 4 branches missed.">        if (klinesRaw == null || klinesRaw.isEmpty()) {</span>
+<span class="nc" id="L45">        	return 0.0;</span>
+        }
+
+<span class="nc" id="L48">        List&lt;List&lt;Object&gt;&gt; klines = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (Object item : klinesRaw) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (item instanceof List&lt;?&gt;) {</span>
+<span class="nc" id="L52">                List&lt;?&gt; rawList = (List&lt;?&gt;) item;</span>
+<span class="nc" id="L53">                klines.add(new ArrayList&lt;&gt;(rawList));</span>
+            }
+<span class="nc" id="L55">        }</span>
+        
+<span class="nc" id="L57">        List&lt;Double&gt; closes = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        for (List&lt;Object&gt; kline : klines) {</span>
+            try {
+<span class="nc" id="L60">                closes.add(Double.parseDouble(kline.get(4).toString())); // Índice 4: precio de cierre</span>
+<span class="nc" id="L61">            } catch (Exception e) {</span>
+<span class="nc" id="L62">                log.error(e.getMessage());</span>
+<span class="nc" id="L63">            }</span>
+<span class="nc" id="L64">        }</span>
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (closes.size() &lt; 2) return 0.0;</span>
+
+<span class="nc" id="L68">        List&lt;Double&gt; logReturns = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        for (int i = 1; i &lt; closes.size(); i++) {</span>
+<span class="nc" id="L70">            double r = Math.log(closes.get(i) / closes.get(i - 1));</span>
+<span class="nc" id="L71">            logReturns.add(r);</span>
+        }
+
+<span class="nc" id="L74">        double avg = logReturns.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);</span>
+        
+<span class="nc" id="L76">        double variance = logReturns.stream()</span>
+<span class="nc" id="L77">            .mapToDouble(r -&gt; Math.pow(r - avg, 2))</span>
+<span class="nc" id="L78">            .average().orElse(0.0);</span>
+
+<span class="nc" id="L80">        return Math.sqrt(variance); // Volatilidad histórica</span>
+        
+    }
+    
+    public List&lt;Double&gt; getClosingPrices(String symbol, String interval, int limit) {
+    	
+<span class="nc" id="L86">        URI uri = UriComponentsBuilder.fromHttpUrl(BINANCE_URL)</span>
+<span class="nc" id="L87">            .queryParam(&quot;symbol&quot;, symbol)</span>
+<span class="nc" id="L88">            .queryParam(&quot;interval&quot;, interval)</span>
+<span class="nc" id="L89">            .queryParam(&quot;limit&quot;, limit)</span>
+<span class="nc" id="L90">            .encode(StandardCharsets.UTF_8)</span>
+<span class="nc" id="L91">            .build()</span>
+<span class="nc" id="L92">            .toUri();</span>
+
+<span class="nc" id="L94">        ResponseEntity&lt;List&lt;List&lt;Object&gt;&gt;&gt; response = restTemplate.exchange(</span>
+        	    uri,
+        	    HttpMethod.GET,
+        	    null,
+<span class="nc" id="L98">        	    new ParameterizedTypeReference&lt;List&lt;List&lt;Object&gt;&gt;&gt;() {}</span>
+        	);
+        
+<span class="nc" id="L101">        List&lt;?&gt; klinesRaw = response.getBody();</span>
+<span class="nc bnc" id="L102" title="All 4 branches missed.">        if (klinesRaw == null || klinesRaw.isEmpty()) return List.of();</span>
+
+<span class="nc" id="L104">        List&lt;List&lt;Object&gt;&gt; klines = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        for (Object item : klinesRaw) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            if (item instanceof List&lt;?&gt;) {</span>
+<span class="nc" id="L108">                List&lt;?&gt; rawList = (List&lt;?&gt;) item;</span>
+<span class="nc" id="L109">                klines.add(new ArrayList&lt;&gt;(rawList));</span>
+            }
+<span class="nc" id="L111">        }</span>
+        
+<span class="nc" id="L113">        List&lt;Double&gt; closes = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        for (List&lt;Object&gt; kline : klines) {</span>
+            try {
+<span class="nc" id="L116">                closes.add(Double.parseDouble(kline.get(4).toString()));</span>
+<span class="nc" id="L117">            } catch (Exception ignored) {}</span>
+<span class="nc" id="L118">        }</span>
+
+<span class="nc" id="L120">        return closes;</span>
+        
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

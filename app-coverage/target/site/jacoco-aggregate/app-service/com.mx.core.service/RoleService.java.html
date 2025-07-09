@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RoleService.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">app-coverage</a> &gt; <a href="../index.html" class="el_bundle">app-service</a> &gt; <a href="index.source.html" class="el_package">com.mx.core.service</a> &gt; <span class="el_source">RoleService.java</span></div><h1>RoleService.java</h1><pre class="source lang-java linenums">package com.mx.core.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.mx.core.model.RoleDto;
+import com.mx.core.model.RoleName;
+import com.mx.core.repository.RoleRepository;
+import com.mx.core.repository.entity.Role;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="nc" id="L15">@AllArgsConstructor</span>
+<span class="nc" id="L16">@Slf4j</span>
+@Service
+public class RoleService {
+
+	private final RoleRepository roleRepository;
+
+	public Role findById(Long id) {
+<span class="nc" id="L23">		return roleRepository.findById(id).orElseThrow(() -&gt; new RuntimeException(&quot;No se encontró el rol con ID: &quot; + id));</span>
+	}
+	
+	public Role findByIdWithPermissions(Long id) {
+<span class="nc" id="L27">	    return roleRepository.findByIdWithPermissions(id).orElseThrow(() -&gt; new RuntimeException(&quot;No se encontró el rol con ID: &quot; + id));</span>
+	}
+	
+	public Role findByNameWithPermissions(RoleName roleName) {
+<span class="nc" id="L31">	    return roleRepository.findByNameWithPermissions(roleName).orElseThrow(() -&gt; new RuntimeException(&quot;No se encontró el rol con Nombre: &quot; + roleName));</span>
+	}
+	
+	public List&lt;RoleDto&gt; findAllRoleSummaries() {
+<span class="nc" id="L35">	    List&lt;RoleDto&gt; roles = roleRepository.findAllRoleSummaries();</span>
+<span class="nc" id="L36">	    return roles;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

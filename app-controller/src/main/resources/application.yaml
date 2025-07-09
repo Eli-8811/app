@@ -1,0 +1,30 @@
+application:
+  title: App Api
+  version: v0.0.1
+spring:
+  application:
+    name: app-api
+  profiles:
+    group:
+      dev: 'dev,dev-db'
+      qa: 'qa,qa-db'
+      prod: 'prod,prod-db'
+    active: '${APP_API_PROFILE:dev}'
+    include:
+      - logging
+  output:
+    ansi:
+      enabled: ALWAYS
+  main:
+    allow-bean-definition-overriding: true
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  springdoc:
+    swagger-ui:
+      operations-sorter: method
+      tags-sorter: alpha
+      doc-expansion: none
+      disable-swagger-default-url: true
